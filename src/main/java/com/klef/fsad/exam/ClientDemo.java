@@ -4,60 +4,49 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.query.Query;
 
-import java.util.Date;
-
-public class ClientDemo 
+public class ClientDemo
 {
-    public static void main(String[] args) 
+    public static void main(String[] args)
     {
+        Configuration cfg = new Configuration();
+        cfg.configure("hibernate.cfg.xml");
 
-        SessionFactory sf = new Configuration()
-                .configure()
-                .buildSessionFactory();
-
+        SessionFactory sf = cfg.buildSessionFactory();
         Session session = sf.openSession();
-
-        /* INSERT RECORD */
 
         Transaction tx = session.beginTransaction();
 
-        Shipment s = new Shipment(
-                "Electronics Shipment",
-                new Date(),
-                "Shipped",
-                "Hyderabad",
-                "Delhi"
+        // Insert Record
+        Inventory inv = new Inventory(
+                "Laptop",
+                "Dell Laptop",
+                "10-03-2026",
+                "Available"
         );
 
-        session.save(s);
+        session.save(inv);
 
         tx.commit();
 
-        System.out.println("Shipment Inserted Successfully");
+        System.out.println("Record Inserted Successfully");
 
-        /* GET GENERATED ID */
-
-        int id = s.getId();
-
-        System.out.println("Inserted ID = " + id);
-
-        /* DELETE USING HQL */
-
+        // Delete Record
         Transaction tx2 = session.beginTransaction();
 
-        Query q = session.createQuery(
-                "delete from Shipment where id = :sid"
-        );
+        Inventory obj = session.get(Inventory.class, 1);
 
-        q.setParameter("sid", id);
-
-        int result = q.executeUpdate();
+        if(obj != null)
+        {
+            session.delete(obj);
+            System.out.println("Record Deleted");
+        }
+        else
+        {
+            System.out.println("Record Not Found");
+        }
 
         tx2.commit();
-
-        System.out.println("Records Deleted = " + result);
 
         session.close();
         sf.close();
